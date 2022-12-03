@@ -26,3 +26,10 @@ sortDesc = sort ▷ reverse
 showLines :: Show a => [a] -> String
 showLines = map show ▷ unlines
 
+-- convert a list of to elements to a pair
+asPair :: [b] -> (b, b)
+asPair [a, b] = (a, b)
+
+-- apply a pair of function to respective values
+mapPair :: (a -> c, b -> d) -> (a, b) -> (c, d)
+mapPair (f, g) (x, y) = (f x, g y)
