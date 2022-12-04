@@ -10,8 +10,8 @@ maintainer:         erik.lagercrantz@klarna.com
 
 executable aoc22
     main-is:          main.hs
-    other-modules:    Util Day1 Day2
-    build-depends:    base ^>=4.16.4.0, split
+    other-modules:    Util Day1 Day2 Day3
+    build-depends:    base ^>=4.16.4.0, split, containers
     hs-source-dirs:   src
     default-language: Haskell2010
     default-extensions: LambdaCase, NamedFieldPuns
@@ -19,6 +19,6 @@ executable aoc22
 executable day1mini
     main-is:          day1mini.hs
     other-modules:    Util
-    build-depends:    base ^>=4.16.4.0, split
+    build-depends:    base ^>=4.16.4.0, split, containers
     hs-source-dirs:   src
     default-language: Haskell2010

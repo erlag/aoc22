@@ -1,6 +1,7 @@
 module Util where
 import Data.List (sort)
 import Data.List.Split (splitOn)
+import qualified Data.Set as Set
 
 -- reverse function composition, for constructing pipeline
 (▷) :: (a -> b) -> (b -> c) -> a -> c
@@ -33,3 +34,7 @@ asPair [a, b] = (a, b)
 -- apply a pair of function to respective values
 mapPair :: (a -> c, b -> d) -> (a, b) -> (c, d)
 mapPair (f, g) (x, y) = (f x, g y)
+
+-- elements that exist in all lists
+intersection :: Ord a => [[a]] -> [a]
+intersection = map Set.fromList ▷ foldr1 Set.intersection ▷ Set.toList
