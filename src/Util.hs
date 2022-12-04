@@ -38,3 +38,7 @@ mapPair (f, g) (x, y) = (f x, g y)
 -- elements that exist in all lists
 intersection :: Ord a => [[a]] -> [a]
 intersection = map Set.fromList ▷ foldr1 Set.intersection ▷ Set.toList
+
+-- count elements where predicate is true
+count :: (a -> Bool) -> [a] -> Integer
+count condition = filter condition ▷ length ▷ fromIntegral
