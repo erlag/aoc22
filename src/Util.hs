@@ -1,6 +1,7 @@
 module Util where
 import Data.List (sort)
 import Data.List.Split (splitOn)
+import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
 
 -- reverse function composition, for constructing pipeline
@@ -42,3 +43,14 @@ intersection = map Set.fromList ▷ foldr1 Set.intersection ▷ Set.toList
 -- count elements where predicate is true
 count :: (a -> Bool) -> [a] -> Integer
 count condition = filter condition ▷ length ▷ fromIntegral
+
+-- return value in case of Just value, or raise an error with message in case of None
+orError :: String -> Maybe a -> a
+orError msg = fromMaybe (error msg)
+
+-- like zip but pad with Nothing when one list is shorter than the other
+padZip :: [a] -> [b] -> [(Maybe a, Maybe b)]
+padZip [] [] = []
+padZip [] bs = [(Nothing, Just b) | b <- bs]
+padZip as [] = [(Just a, Nothing) | a <- as]
+padZip (a:as) (b:bs) = (Just a, Just b) : padZip as bs

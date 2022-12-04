@@ -14,7 +14,7 @@ executable aoc22
     build-depends:    base ^>=4.16.3.0, split, containers
     hs-source-dirs:   src
     default-language: Haskell2010
-    default-extensions: LambdaCase, NamedFieldPuns
+    default-extensions: LambdaCase, NamedFieldPuns, ScopedTypeVariables, BangPatterns
 
 executable day1mini
     main-is:          Day1Mini.hs
