@@ -4,14 +4,15 @@ import Control.Exception ( catch, IOException )
 import Control.Monad (when)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Util ( (▷), showLines, orError, padZip )
+import Util ( (▷), orError, padZip )
 import qualified Day1
 import qualified Day2
 import qualified Day3
 import qualified Day4
+import qualified Day5
 
-type Output = [Integer]
-type Solution = String -> Output
+type Solution = String -> [String]
+
 data CheckOutcome = Missing | New | Correct | Wrong deriving (Eq, Show)
 
 main :: IO ()
@@ -28,16 +29,18 @@ main = do
 getSolution :: String -> Solution
 getSolution name = lookup name solutions & orError ("no solution for " ++ name)
 
+
 solutions :: [(String, Solution)] 
 solutions = 
-    [ ("day1", Day1.run)
-    , ("day2", Day2.run)
-    , ("day3", Day3.run)
-    , ("day4", Day4.run)
+    [ ("day1", Day1.run ▷ map show)
+    , ("day2", Day2.run ▷ map show)
+    , ("day3", Day3.run ▷ map show)
+    , ("day4", Day4.run ▷ map show)
+    , ("day5", Day5.run)
     ]
 
 invoke :: Solution -> IO String -> IO String
-invoke !solution = fmap (solution ▷ showLines)
+invoke !solution = fmap (solution ▷ unlines)
 
 check :: (String, Solution) -> IO ()
 check (name, solution) = do

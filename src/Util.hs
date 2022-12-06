@@ -8,9 +8,17 @@ import qualified Data.Set as Set
 (▷) :: (a -> b) -> (b -> c) -> a -> c
 f ▷ g = g . f
 
+-- pipeline from list of functions
+pipeline :: [a -> a] -> a -> a
+pipeline = foldr (▷) id
+
 -- apply all functions in a list to the same argument
 applyEach :: [a -> b] -> a -> [b]
 applyEach fs x = map ($ x) fs
+
+-- apply both functions to the same argument and produce a pair
+applyBoth :: (a -> b, a -> c) -> a -> (b, c)
+applyBoth (f, g) x = (f x, g x)
 
 -- split a string at double line breaks
 blocks :: String -> [String]
@@ -23,10 +31,6 @@ readWords = words ▷ map read
 -- sort in descending order
 sortDesc :: Ord a => [a] -> [a]
 sortDesc = sort ▷ reverse
-
--- turn list into string with one element per line
-showLines :: Show a => [a] -> String
-showLines = map show ▷ unlines
 
 -- convert a list of to elements to a pair
 asPair :: [b] -> (b, b)
