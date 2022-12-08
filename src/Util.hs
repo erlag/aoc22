@@ -1,5 +1,5 @@
 module Util where
-import Data.List (sort)
+import Data.List (sort, singleton)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
 import qualified Data.Set as Set
@@ -27,6 +27,10 @@ blocks = splitOn "\n\n"
 -- split string by whitespace and parse each word according to the desired type (e.g. Integer)
 readWords :: Read a => String -> [a]
 readWords = words ▷ map read
+
+-- parse each character according to the desired type (e.g. Integer)
+readChars :: Read a => String -> [a]
+readChars = map singleton ▷ map read
 
 -- sort in descending order
 sortDesc :: Ord a => [a] -> [a]
