@@ -1,7 +1,8 @@
 module Util where
-import Data.List (sort, singleton)
+import Data.List (sort, singleton, nub)
 import Data.List.Split (splitOn)
 import Data.Maybe (fromMaybe)
+import Data.Bifunctor (bimap)
 import qualified Data.Set as Set
 
 -- reverse function composition, for constructing pipeline
@@ -42,7 +43,15 @@ asPair [a, b] = (a, b)
 
 -- apply a pair of function to respective values
 mapPair :: (a -> c, b -> d) -> (a, b) -> (c, d)
-mapPair (f, g) (x, y) = (f x, g y)
+mapPair (f, g) = bimap f g
+
+-- apply a function to both elements
+both :: (a -> b) -> (a, a) -> (b, b)
+both f = bimap f f
+
+-- combine pair elements... pairwise
+zipPairWith :: (a -> b -> c) -> (a, a) -> (b, b) -> (c, c)
+zipPairWith f a = mapPair (both f a)
 
 -- elements that exist in all lists
 intersection :: Ord a => [[a]] -> [a]
@@ -51,6 +60,10 @@ intersection = map Set.fromList ▷ foldr1 Set.intersection ▷ Set.toList
 -- count elements where predicate is true
 count :: (a -> Bool) -> [a] -> Integer
 count condition = filter condition ▷ length ▷ fromIntegral
+
+-- count number of unique elements
+countUnique :: Eq a => [a] -> Integer
+countUnique = nub ▷ length ▷ fromIntegral
 
 -- return value in case of Just value, or raise an error with message in case of None
 orError :: String -> Maybe a -> a
