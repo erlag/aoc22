@@ -1,6 +1,6 @@
 module Util where
-import Data.List (sort, singleton, nub)
-import Data.List.Split (splitOn)
+import Data.List (sort, singleton, nub, intersperse)
+import Data.List.Split (splitOn, divvy)
 import Data.Maybe (fromMaybe)
 import Data.Bifunctor (bimap)
 import qualified Data.Set as Set
@@ -24,6 +24,10 @@ applyBoth (f, g) x = (f x, g x)
 -- split a string at double line breaks
 blocks :: String -> [String]
 blocks = splitOn "\n\n"
+
+-- use given separator to join a list of strings
+joinBy :: String -> [String] -> String
+joinBy sep = intersperse sep ▷ concat
 
 -- split string by whitespace and parse each word according to the desired type (e.g. Integer)
 readWords :: Read a => String -> [a]
@@ -75,3 +79,6 @@ padZip [] [] = []
 padZip [] bs = [(Nothing, Just b) | b <- bs]
 padZip as [] = [(Just a, Nothing) | a <- as]
 padZip (a:as) (b:bs) = (Just a, Just b) : padZip as bs
+
+fullChunksOf :: Int -> [a] -> [[a]]
+fullChunksOf n = divvy n n

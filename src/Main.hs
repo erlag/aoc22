@@ -15,6 +15,7 @@ import qualified Day6
 import qualified Day7
 import qualified Day8
 import qualified Day9
+import qualified Day10
 import Data.Maybe (catMaybes)
 
 type Solution = String -> [String]
@@ -47,6 +48,7 @@ solutions =
     , ("day7", Day7.run ▷ map show)
     , ("day8", Day8.run ▷ map show)
     , ("day9", Day9.run ▷ map show)
+    , ("day10", Day10.run ▷ \(a, b) -> [show a, b])
     ]
 
 invoke :: (a -> [String]) -> IO a -> IO String
