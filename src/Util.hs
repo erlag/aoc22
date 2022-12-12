@@ -2,8 +2,13 @@ module Util where
 import Data.List (sort, singleton, nub, intersperse)
 import Data.List.Split (splitOn, divvy)
 import Data.Maybe (fromMaybe)
+import Data.Function ((&))
 import Data.Bifunctor (bimap)
+import Data.Void (Void)
+import Control.Exception (Exception, throw)
 import qualified Data.Set as Set
+import qualified Text.Megaparsec as P
+import qualified Text.Megaparsec.Char as PC
 
 -- reverse function composition, for constructing pipeline
 (▷) :: (a -> b) -> (b -> c) -> a -> c
@@ -80,5 +85,20 @@ padZip [] bs = [(Nothing, Just b) | b <- bs]
 padZip as [] = [(Just a, Nothing) | a <- as]
 padZip (a:as) (b:bs) = (Just a, Just b) : padZip as bs
 
+-- split into chunks of specified size -- returning only full chunks
 fullChunksOf :: Int -> [a] -> [[a]]
 fullChunksOf n = divvy n n
+
+
+-- Megaparsec parser type with String input and no custom error type
+type Parser = P.Parsec Void String
+
+-- run Megaparsec parser, consuming all input except trailing whitespace, and returning result, throwing error on failure
+applyParser :: Parser a -> String -> a
+applyParser p s = P.runParser (p <* endinput) "" s & rightOrError
+    where endinput = P.many PC.newline >> P.eof
+
+-- return value if Right, or throw exception from Left
+rightOrError :: Exception e => Either e a -> a
+rightOrError (Left e)  = throw e
+rightOrError (Right a) = a
