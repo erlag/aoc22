@@ -85,6 +85,10 @@ padZip [] bs = [(Nothing, Just b) | b <- bs]
 padZip as [] = [(Just a, Nothing) | a <- as]
 padZip (a:as) (b:bs) = (Just a, Just b) : padZip as bs
 
+-- Zip elements in two two-dimensional lists
+zip2D :: [[a]] -> [[b]] -> [[(a, b)]]
+zip2D = zipWith zip
+
 -- split into chunks of specified size -- returning only full chunks
 fullChunksOf :: Int -> [a] -> [[a]]
 fullChunksOf n = divvy n n
