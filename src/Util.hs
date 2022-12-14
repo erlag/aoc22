@@ -18,6 +18,18 @@ f ▷ g = g . f
 pipeline :: [a -> a] -> a -> a
 pipeline = foldr (▷) id
 
+-- apply function repeatedly until output is equal to input
+fix' :: Eq t => (t -> t) -> t -> t
+fix' f x = let y = f x in if y == x then y else fix' f y
+
+-- apply function repeatedly until output is equal to input, or Nothing
+maybeFix :: Eq a => (a -> Maybe a) -> a -> Maybe a
+maybeFix f x = fix' (>>= f) (Just x)
+
+-- iterate function, calling it with its own output, until it returns Nothing, and return list of produced values
+iterJust :: (t -> Maybe t) -> t -> [t]
+iterJust f x = x : case f x of Nothing -> []; Just y -> iterJust f y
+
 -- apply all functions in a list to the same argument
 applyEach :: [a -> b] -> a -> [b]
 applyEach fs x = map ($ x) fs
@@ -77,6 +89,10 @@ countUnique = nub ▷ length ▷ fromIntegral
 -- return value in case of Just value, or raise an error with message in case of None
 orError :: String -> Maybe a -> a
 orError msg = fromMaybe (error msg)
+
+-- apply function to adjacent pairs of elements
+mapAdjacent :: (a -> a -> b) -> [a] -> [b]
+mapAdjacent f xs = zipWith f xs (tail xs)
 
 -- like zip but pad with Nothing when one list is shorter than the other
 padZip :: [a] -> [b] -> [(Maybe a, Maybe b)]
