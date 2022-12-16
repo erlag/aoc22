@@ -1,11 +1,11 @@
 module Main (main) where
 import System.Environment ( getArgs )
-import Control.Exception ( evaluate, handle, handleJust, IOException, ErrorCall, Exception )
+import Control.Exception ( evaluate, handle, handleJust, IOException, ErrorCall, Exception, SomeException )
 import Control.Monad (when)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (isPrefixOf)
-import Util ( (▷), orError, padZip )
+import Util ( (▷), orError, padZip, ParserError )
 import qualified Day1
 import qualified Day2
 import qualified Day3
@@ -21,6 +21,8 @@ import qualified Day12
 import qualified Day13
 import qualified Day14
 import Data.Maybe (catMaybes)
+import Text.Megaparsec (ParseErrorBundle, errorBundlePretty)
+import System.Exit (die)
 
 type Solution = String -> [String]
 
@@ -62,7 +64,7 @@ solutions =
 invoke :: (a -> [String]) -> IO a -> IO String
 invoke !solution inputAction = do
     input <- inputAction
-    maybeOutputs <- mapM maybeUndefined $ solution input
+    maybeOutputs <- mapM maybeUndefined (solution input) & parseErrorDie
     return $ unlines $ catMaybes maybeOutputs
 
 check :: (String, Solution) -> IO ()
@@ -103,3 +105,6 @@ isUndefinedError (e::ErrorCall) = "Prelude.undefined" `isPrefixOf` show e
 
 maybeUndefined :: a -> IO (Maybe a)
 maybeUndefined x = fallback isUndefinedError Nothing (Just <$> evaluate x)
+
+parseErrorDie :: IO a -> IO a
+parseErrorDie = handle (\case (err::ParserError) -> die (errorBundlePretty err))

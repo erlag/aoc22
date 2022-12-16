@@ -112,6 +112,7 @@ fullChunksOf n = divvy n n
 
 -- Megaparsec parser type with String input and no custom error type
 type Parser = P.Parsec Void String
+type ParserError = P.ParseErrorBundle String Void
 
 -- run Megaparsec parser, consuming all input except trailing whitespace, and returning result, throwing error on failure
 applyParser :: Parser a -> String -> a
