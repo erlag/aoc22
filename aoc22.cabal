@@ -10,11 +10,11 @@ maintainer:         erik.lagercrantz@klarna.com
 
 executable aoc22
     main-is:          Main.hs
-    other-modules:    Util Day1 Day2 Day3 Day4 Day5 Day6 Day7 Day8 Day9 Day10 Day11 Day12 Day13 Day14 DayX
-    build-depends:    base ^>=4.16.3.0, split, containers, megaparsec, search-algorithms
+    other-modules:    Util Day1 Day2 Day3 Day4 Day5 Day6 Day7 Day8 Day9 Day10 Day11 Day12 Day13 Day14 Day15 DayX
+    build-depends:    base ^>=4.16.3.0, split, containers, megaparsec, search-algorithms, range-set-list
     hs-source-dirs:   src
     default-language: Haskell2010
-    default-extensions: LambdaCase, NamedFieldPuns, ScopedTypeVariables, BangPatterns
+    default-extensions: LambdaCase, NamedFieldPuns, ScopedTypeVariables, BangPatterns, TupleSections
 
 executable day1mini
     main-is:          Day1Mini.hs

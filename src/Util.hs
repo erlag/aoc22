@@ -79,11 +79,11 @@ intersection :: Ord a => [[a]] -> [a]
 intersection = map Set.fromList ▷ foldr1 Set.intersection ▷ Set.toList
 
 -- count elements where predicate is true
-count :: (a -> Bool) -> [a] -> Integer
+count :: Integral i => (a -> Bool) -> [a] -> i
 count condition = filter condition ▷ length ▷ fromIntegral
 
 -- count number of unique elements
-countUnique :: Eq a => [a] -> Integer
+countUnique :: (Eq a, Integral i) => [a] -> i
 countUnique = nub ▷ length ▷ fromIntegral
 
 -- return value in case of Just value, or raise an error with message in case of None

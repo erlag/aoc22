@@ -20,6 +20,7 @@ import qualified Day11
 import qualified Day12
 import qualified Day13
 import qualified Day14
+import qualified Day15
 import Data.Maybe (catMaybes)
 import Text.Megaparsec (ParseErrorBundle, errorBundlePretty)
 import System.Exit (die)
@@ -59,6 +60,7 @@ solutions =
     , ("day12", Day12.run ▷ map show)
     , ("day13", Day13.run ▷ map show)
     , ("day14", Day14.run ▷ map show)
+    , ("day15", Day15.run ▷ map show)
     ]
 
 invoke :: (a -> [String]) -> IO a -> IO String
