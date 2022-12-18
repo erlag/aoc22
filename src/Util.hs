@@ -1,5 +1,5 @@
 module Util where
-import Data.List (sort, singleton, nub, intersperse)
+import Data.List (sort, sortOn, singleton, nub, intersperse)
 import Data.List.Split (splitOn, divvy)
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
@@ -57,6 +57,10 @@ readChars = map singleton ▷ map read
 -- sort in descending order
 sortDesc :: Ord a => [a] -> [a]
 sortDesc = sort ▷ reverse
+
+-- sort in descending order
+sortDescOn :: Ord b => (a -> b) -> [a] -> [a]
+sortDescOn f = sortOn f ▷ reverse
 
 -- convert a list of to elements to a pair
 asPair :: [a] -> (a, a)
