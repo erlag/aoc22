@@ -91,6 +91,18 @@ add2 = zipPairWith (+)
 sub2 :: Num a => (a, a) -> (a, a) -> (a, a)
 sub2 = zipPairWith (-)
 
+-- convert a list of to elements to a triplet
+asTriplet :: [a] -> (a, a, a)
+asTriplet [a,b,c] = (a,b,c)
+
+-- combine triplet elements pairwise
+zip3With :: (a -> b -> c) -> (a, a, a) -> (b, b, b) -> (c, c, c)
+zip3With f (x1, y1, z1) (x2, y2, z2) = (f x1 x2, f y1 y2, f z1 z2)
+
+-- add triplets elementwise (e.g. to move a 3D point)
+add3 :: Num a => (a, a, a) -> (a, a, a) -> (a, a, a)
+add3 = zip3With (+)
+
 -- elements that exist in all lists
 intersection :: Ord a => [[a]] -> [a]
 intersection = map S.fromList ▷ foldr1 S.intersection ▷ S.toList
