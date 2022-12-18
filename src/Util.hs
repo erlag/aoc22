@@ -6,7 +6,7 @@ import Data.Function ((&))
 import Data.Bifunctor (bimap)
 import Data.Void (Void)
 import Control.Exception (Exception, throw)
-import qualified Data.Set as Set
+import qualified Data.Set as S
 import qualified Text.Megaparsec as P
 import qualified Text.Megaparsec.Char as PC
 
@@ -54,6 +54,11 @@ readWords = words ▷ map read
 readChars :: Read a => String -> [a]
 readChars = map singleton ▷ map read
 
+-- rotoate list left
+rotLeft :: [a] -> [a]
+rotLeft [] = []
+rotLeft l = tail l ++ [head l]
+
 -- sort in descending order
 sortDesc :: Ord a => [a] -> [a]
 sortDesc = sort ▷ reverse
@@ -88,7 +93,7 @@ sub2 = zipPairWith (-)
 
 -- elements that exist in all lists
 intersection :: Ord a => [[a]] -> [a]
-intersection = map Set.fromList ▷ foldr1 Set.intersection ▷ Set.toList
+intersection = map S.fromList ▷ foldr1 S.intersection ▷ S.toList
 
 -- count elements where predicate is true
 count :: Integral i => (a -> Bool) -> [a] -> i
@@ -97,6 +102,11 @@ count condition = filter condition ▷ length ▷ fromIntegral
 -- count number of unique elements
 countUnique :: (Eq a, Integral i) => [a] -> i
 countUnique = nub ▷ length ▷ fromIntegral
+
+findDuplicates :: (Ord a) => [a] -> S.Set a -> [a]
+findDuplicates [] _ = []
+findDuplicates (h:t) seen | S.member h seen = h : findDuplicates t seen 
+                          | otherwise         = findDuplicates t (S.insert h seen)
 
 -- return value in case of Just value, or raise an error with message in case of None
 orError :: String -> Maybe a -> a
