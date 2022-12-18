@@ -33,7 +33,7 @@ Example:
 -}
 
 module Day13 (run) where
-import Util
+import Util ( Parser, (▷), applyEach, blocks, asPair, applyParser )
 import Data.List (sort)
 import Text.Megaparsec ( sepBy, (<|>), between )
 import Text.Megaparsec.Char ( newline, string )

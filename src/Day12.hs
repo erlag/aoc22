@@ -18,7 +18,7 @@ abdefghi
 -}
 
 module Day12 (run) where
-import Util
+import Util ( (▷), applyEach, zip2D )
 import Algorithm.Search (bfs)
 import Data.Function ((&))
 import Data.List (lookup)

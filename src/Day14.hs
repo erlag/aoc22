@@ -19,7 +19,7 @@ Example:
 -}
 
 module Day14 (run) where
-import Util ( (▷), applyEach, asPair, both, zipPairWith, maybeFix, iterJust )
+import Util ( (▷), applyEach, asPair, both, add2, sub2, maybeFix, iterJust )
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (find)
@@ -30,14 +30,8 @@ type Input = [[Pos]]
 type Pos = (Int, Int)
 type Structure = Set Pos
 
-move :: Pos -> (Int, Int) -> Pos
-move = zipPairWith (+)
-
-diff :: Pos -> Pos -> (Int, Int)
-diff = zipPairWith (-)
-
 towards :: Pos -> Pos -> Pos
-a `towards` b = b `diff` a & both signum & move a
+a `towards` b = b `sub2` a & both signum & add2 a
 
 path :: [Pos] -> [Pos]
 path [p] = [p]
@@ -49,7 +43,7 @@ renderCave = concatMap path ▷ fromList
 
 fallStep :: (Pos -> Bool) -> (Pos -> Bool) -> Pos -> Maybe Pos
 fallStep available inBounds = applyEach [down, downLeft, downRight, stay] ▷ find available ▷ find inBounds
-    where down = move (0, 1); downLeft = move (-1, 1); downRight = move (1, 1); stay = id
+    where down = add2 (0, 1); downLeft = add2 (-1, 1); downRight = add2 (1, 1); stay = id
 
 dropSand :: Pos -> (Pos -> Bool) -> (Pos -> Bool) -> Set Pos -> Maybe (Set Pos)
 dropSand entryPoint isFloor isAbyss structure = entryPoint & maybeFix step <&> (`insert` structure)

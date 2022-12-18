@@ -59,8 +59,8 @@ sortDesc :: Ord a => [a] -> [a]
 sortDesc = sort ▷ reverse
 
 -- convert a list of to elements to a pair
-asPair :: [b] -> (b, b)
-asPair [a, b] = (a, b)
+asPair :: [a] -> (a, a)
+asPair [x, y] = (x, y)
 
 -- apply a pair of function to respective values
 mapPair :: (a -> c, b -> d) -> (a, b) -> (c, d)
@@ -73,6 +73,14 @@ both f = bimap f f
 -- combine pair elements... pairwise
 zipPairWith :: (a -> b -> c) -> (a, a) -> (b, b) -> (c, c)
 zipPairWith f a = mapPair (both f a)
+
+-- add 2-tuples elementwise (e.g. to move a 2D point)
+add2 :: Num a => (a, a) -> (a, a) -> (a, a)
+add2 = zipPairWith (+)
+
+-- 2-tuple subtraction elementwise (e.g. as for determining distance between 2D points)
+sub2 :: Num a => (a, a) -> (a, a) -> (a, a)
+sub2 = zipPairWith (-)
 
 -- elements that exist in all lists
 intersection :: Ord a => [[a]] -> [a]

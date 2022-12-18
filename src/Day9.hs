@@ -32,7 +32,7 @@ U 20
 -}
 
 module Day9 (run) where
-import Util ( (▷), applyEach, both, asPair, mapPair, zipPairWith, pipeline, countUnique )
+import Util ( (▷), applyEach, both, asPair, mapPair, add2, sub2, pipeline, countUnique )
 import Data.Bifunctor ( bimap )
 import Data.Function ( (&) )
 
@@ -44,21 +44,15 @@ type Pos = (Int, Int)
 delta :: Direction -> (Int, Int)
 delta = \case { R -> (1, 0); L -> (-1, 0) ; U -> (0, 1) ; D -> (0, -1) }
 
-moveDelta :: Pos -> (Int, Int) -> Pos
-moveDelta = zipPairWith (+)
-
 move :: Pos -> Direction -> Pos
-move pos = delta ▷ moveDelta pos
-
-diff :: Pos -> Pos -> (Int, Int)
-diff = zipPairWith (-)
+move pos = delta ▷ add2 pos
 
 distance :: Pos -> Pos -> Int
-distance a b = diff a b & both abs & uncurry max
+distance a b = sub2 a b & both abs & uncurry max
 
 chase :: Pos -> Pos -> Pos
 t `chase` h | distance h t <= 1 = t
-            | otherwise = diff h t & both signum & moveDelta t
+            | otherwise = sub2 h t & both signum & add2 t
 
 traceRopePaths :: [Direction] -> [[Pos]]
 traceRopePaths = scanl move origin ▷ iterate (scanl chase origin)
