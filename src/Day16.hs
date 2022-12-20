@@ -23,54 +23,70 @@ Valve JJ has flow rate=21; tunnel leads to valve II
 -}
 
 module Day16 (run) where
-import Util
-import Data.Function ((&))
-import Data.List (permutations, delete)
-import Algorithm.Search (bfs)
+import Util ( Parser, (▷), applyEach, applyParser, both )
+import Data.Function ( (&) )
+import Data.List ( delete, elemIndex, nub, foldl )
+import Data.Maybe ( fromJust )
+import Algorithm.Search ( bfs )
 import Control.Monad ( replicateM )
 import Data.Map (Map, fromList, (!), keys)
-import Text.Megaparsec ( sepBy, (<|>), takeP )
+import Text.Megaparsec ( sepBy, (<|>) )
 import Text.Megaparsec.Char ( newline, string, upperChar )
 import Text.Megaparsec.Char.Lexer ( decimal )
-import Data.Foldable (minimumBy)
-import Debug.Trace (traceShowId)
+import qualified Data.Vector.Unboxed as V
+import qualified Data.Matrix.Unboxed as M
 
+type Id = Int
 type Name = String
 data Valve = Valve { name :: Name, flowRate :: Int, neighbors :: [Name] }  deriving Show
 type Input = Map Name Valve
 
-data Agent = Agent { timeRemaining :: Int, location :: Name }
+data Agent nodeId = Agent { timeRemaining :: Int, location :: nodeId }
 
 shortestPathLength :: (Name -> [Name]) -> Name -> Name -> Int
 shortestPathLength neighborsLookup source destination = length path where
     Just path = bfs neighborsLookup (== destination) source
 
-singleSourcePathLengths :: (Name -> [Name]) -> String -> [String] -> Map String Int
+singleSourcePathLengths :: (Name -> [Name]) -> Name -> [Name] -> Map Name Int
 singleSourcePathLengths neighbors source destinations =
     fromList [(destination, shortestPathLength neighbors source destination) | destination <- destinations]
     -- note: this could be done with a single breadth-first traversal instad of doing it once per destination.
     --       but the bfs algorithm in Algorithm.Search only supports a single target.
 
-allPairsPathLengths :: (Name -> [Name]) -> [Name] -> [Name] -> Map String (Map String Int)
+allPairsPathLengths :: (Name -> [Name]) -> [Name] -> [Name] -> Map Name (Map Name Int)
 allPairsPathLengths neighbors sources destinations =
     fromList [(source, singleSourcePathLengths neighbors source destinations) | source <- sources]
 
-maximizeGain :: (Name -> Int) -> (Name -> Name -> Int) -> [Agent] -> [Name] -> Int
-maximizeGain gainRateLookup delayLookup agents remainingNodes
-    | null agents || null remainingNodes = 0
-    | otherwise = maximum $ do
-        let currentAgent : otherAgents = sortDescOn timeRemaining agents
-        nextNodeChoice <- remainingNodes
-        let nextDelay = delayLookup (location currentAgent) nextNodeChoice
-            timeRemainingAfterDelay = timeRemaining currentAgent - nextDelay
-        if timeRemainingAfterDelay < 0 then
-            return $ maximizeGain gainRateLookup delayLookup otherAgents remainingNodes
-        else do
-            let movedAgent = currentAgent { timeRemaining = timeRemainingAfterDelay, location = nextNodeChoice }
-                restOfNodes = delete nextNodeChoice remainingNodes
-                gainFromMove = timeRemainingAfterDelay * gainRateLookup nextNodeChoice
-                gainFromRest = maximizeGain gainRateLookup delayLookup (movedAgent : otherAgents) restOfNodes
-            return (gainFromMove + gainFromRest)
+maximizeGain' :: V.Vector Int -> M.Matrix Int -> [Agent Id] -> [Id] -> Int
+maximizeGain' !gainRateVector !delayMatrix = loopOverNodeChoices where
+    loopOverNodeChoices agentQueue nodes = foldl max 0 [evaluateChoice agentQueue node (delete node nodes) | node <- nodes]
+    
+    evaluateChoice agentQueue@[] _ _ = 0
+    evaluateChoice (agent:otherAgents) chosenNode remainingNodes =
+        let movedAgent = Agent { location = chosenNode, timeRemaining = timeRemaining agent - delayMatrix M.! (location agent, chosenNode) }
+            gainFromMove = timeRemaining movedAgent * gainRateVector V.! chosenNode
+        in if timeRemaining movedAgent < 0 then evaluateChoice otherAgents chosenNode remainingNodes
+           else gainFromMove + loopOverNodeChoices (enqueueAgent movedAgent otherAgents) remainingNodes
+    
+    enqueueAgent agent [] = [agent]
+    enqueueAgent agent (h : t) | timeRemaining agent > timeRemaining h = agent : h : t
+                               | otherwise = h : enqueueAgent agent t
+
+maximizeGain :: (Name -> Int) -> (Name -> Name -> Int) -> [Agent Name] -> [Name] -> Int
+maximizeGain gainRateLookup delayLookup agents remainingNodes =
+    -- Call through to maximizeGain' but first pre-apply the lookup functions and create unboxed vector and matrix as fast lookup tables.
+    -- Node names are replaced with integers used for indexing into the vector and matrix.
+    let nodeNames = nub (remainingNodes ++ map location agents)
+        nNodes = length nodeNames
+        nodesIds = take nNodes [0..]
+        nRemainingNodes = length remainingNodes
+        remainingNodeIds = take nRemainingNodes nodesIds
+        nodeIdFromName = (`elemIndex` nodeNames) ▷ fromJust
+        nodeNameFromId = (nodeNames !!)
+        agents' = agents & map (\Agent { timeRemaining, location } -> Agent { timeRemaining, location = nodeIdFromName location })
+        gainRateVector = V.generate nNodes (gainRateLookup . nodeNameFromId)
+        delayMatrix = M.generate (nNodes, nRemainingNodes) (uncurry delayLookup . both nodeNameFromId)
+    in maximizeGain' gainRateVector delayMatrix agents' remainingNodeIds
 
 solve1 :: Input -> Int
 solve1 input = maximizeGain rateLookup delayLookup agents nonZeroValves
