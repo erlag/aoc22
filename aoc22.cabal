@@ -19,13 +19,13 @@ executable aoc22
 executable day1mini
     main-is:          Day1Mini.hs
     other-modules:    Util
-    build-depends:    base ^>=4.16.3.0, split, containers
+    build-depends:    base ^>=4.16.3.0, split, containers, megaparsec
     hs-source-dirs:   src
     default-language: Haskell2010
 
 executable day10mini
     main-is:          Day10_2_Mini.hs
-    build-depends:    base ^>=4.16.3.0, split, containers
+    build-depends:    base ^>=4.16.3.0, split, containers, megaparsec
     hs-source-dirs:   src
     default-language: Haskell2010
     default-extensions: LambdaCase
