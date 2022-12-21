@@ -30,6 +30,7 @@ import qualified Day16
 import qualified Day17
 import qualified Day18
 import qualified Day19
+import qualified Day20
 
 type Solution = String -> [String]
 
@@ -70,6 +71,7 @@ solutions =
     , ("day17", Day17.run ▷ map show)
     , ("day18", Day18.run ▷ map show)
     , ("day19", Day19.run ▷ map show)
+    , ("day20", Day20.run ▷ map show)
     ]
 
 invoke :: (a -> [String]) -> IO a -> IO String
