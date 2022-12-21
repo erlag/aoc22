@@ -1,11 +1,16 @@
 module Main (main) where
 import System.Environment ( getArgs )
+import System.Exit (die)
+import Control.Concurrent ( newChan, readChan, writeChan, forkIO, Chan )
+import Control.Concurrent.Chan ( newChan, readChan, writeChan, Chan )
 import Control.Exception ( evaluate, handle, handleJust, IOException, ErrorCall, Exception, SomeException )
-import Control.Monad (when)
+import Control.Monad (when, replicateM_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.List (isPrefixOf)
+import Data.Maybe (catMaybes)
 import Util ( (▷), orError, padZip, ParserError )
+import Text.Megaparsec (ParseErrorBundle, errorBundlePretty)
 import qualified Day1
 import qualified Day2
 import qualified Day3
@@ -25,9 +30,6 @@ import qualified Day16
 import qualified Day17
 import qualified Day18
 import qualified Day19
-import Data.Maybe (catMaybes)
-import Text.Megaparsec (ParseErrorBundle, errorBundlePretty)
-import System.Exit (die)
 
 type Solution = String -> [String]
 
@@ -37,8 +39,8 @@ main :: IO ()
 main = do
     args <- getArgs
     case args of
-        [] -> mapM_ check solutions
-        [name] -> check (name, getSolution name)
+        [] -> runInWorkersAndHandleResults (map check solutions) putStrLn
+        [name] -> check (name, getSolution name) >>= putStrLn
         [name, "-"] -> invoke (getSolution name) getContents >>= putStr
         [name, infile] -> invoke (getSolution name) (readFile infile) >>= putStr
         [name, infile, outfile] -> invoke (getSolution name) (readFile infile) >>= writeFile outfile
@@ -46,7 +48,6 @@ main = do
 
 getSolution :: String -> Solution
 getSolution name = lookup name solutions & orError ("no solution for " ++ name)
-
 
 solutions :: [(String, Solution)] 
 solutions = 
@@ -77,16 +78,16 @@ invoke !solution inputAction = do
     maybeOutputs <- mapM maybeUndefined (solution input) & parseErrorDie
     return $ unlines $ catMaybes maybeOutputs
 
-check :: (String, Solution) -> IO ()
+check :: (String, Solution) -> IO String
 check (name, solution) = do
     let inputFile =  "./inputs/" ++ name ++ ".txt"
     let outputFile = "./outputs/" ++ name ++ ".txt"
     actual <- inputFile & readFile & invoke solution <&> words
     expected <- outputFile & readFile <&> words & ioFallback []
     let assessment = padZip expected actual & map assess
-    putStrLn $ showAssessment name expected actual assessment
     let shouldUpdate = New `elem` assessment && not (Missing `elem` assessment || Wrong `elem` assessment)
     when shouldUpdate $ writeFile outputFile (unlines actual)
+    return $ showAssessment name expected actual assessment
 
 showAssessment :: String -> [String] -> [String] -> [Assessment] -> String
 showAssessment name expected actual assessment = name ++ " " ++ summary ++ " " ++ values ++ comment
@@ -118,3 +119,15 @@ maybeUndefined x = fallback isUndefinedError Nothing (Just <$> evaluate x)
 
 parseErrorDie :: IO a -> IO a
 parseErrorDie = handle (\case (err::ParserError) -> die (errorBundlePretty err))
+
+
+runInWorkersAndHandleResults :: [IO a] -> (a -> IO ()) -> IO ()
+runInWorkersAndHandleResults actions handler = do
+    chan <- runInWorkers actions
+    replicateM_ (length actions) (readChan chan >>= handler)
+
+runInWorkers :: [IO a] -> IO (Chan a)
+runInWorkers actions = do
+    chan <- newChan
+    sequence_ [forkIO $ action >>= writeChan chan | action <- actions]
+    return chan
